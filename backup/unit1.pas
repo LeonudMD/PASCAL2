@@ -114,14 +114,14 @@ begin
  if not FileExists('engines.dbf') then begin
 
   with Dbf1.FieldDefs do begin
-   Add('№', ftAutoInc, 0, True);
-   Add('Название', ftString, 16, True);
-   Add('Тяга, мН', ftString, 16, True);
-   Add('Удельный импульс, с', ftString, 16, True);
-   Add('Потребляемая мощность, кВт', ftString, 16, True);
-   Add('КПД, %', ftString, 16, True);
-   Add('Ресурс, ч', ftString, 16, True);
-   Add('Масса, кг', ftString, 16, True);
+   Add('ID', ftAutoInc, 0, True);
+   Add('NAME', ftString, 16, True);
+   Add('Thrust, mN', ftString, 16, True);
+   Add('Specific impulse, s', ftString, 16, True);
+   Add('Power consumption, kW', ftString, 16, True);
+   Add('Efficiency, %', ftString, 16, True);
+   Add('Resource, h', ftString, 16, True);
+   Add('Weight, kg', ftString, 16, True);
   end;
 
   Dbf1.CreateTable;
@@ -137,34 +137,68 @@ begin
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
- var P, Mpn, M0, a0, c, Tm, copt, i0, e0, r0, ik, ek, rk, AlphaEY, GammaDY,
-    GammaK, GammaSPX, NuT, NuEY, bal, SSB:real;
-
+var
+  P, Mpn, M0, a0, c, Tm, copt, i0, e0, r0, ik, ek, rk,
+  AlphaEY, GammaDY, GammaK, GammaSPX, NuT, NuEY, bal, SSB: real;
 begin
-  Mpn:=StrToFloat(MassaPN.Text);
-  Tm:=StrToFloat(MotorVr.Text);
-  c:=StrToFloat(ScorostIst.Text);
-  i0:=StrToFloat(nakl0.Text);
-  i0:=i0*pi/180;
-  r0:=StrToFloat(radius0.Text);
-  e0:=StrToFloat(exc0.Text);
-  ik:=StrToFloat(naklkon.Text);
-  ik:=ik*pi/180;
-  rk:=StrToFloat(radiuskon.Text);
-  ek:=StrToFloat(exckon.Text);
-  AlphaEY:=StrToFloat(udmassEY.Text);
-  GammaDY:= StrToFloat(udmassDY.Text);
-  GammaK:= StrToFloat(udmasskotsr.Text);
-  GammaSPX:= StrToFloat(otnmassSPH.Text);
-  NuT:=StrToFloat(tyagKPD.Text);
-  NuEY:=StrToFloat(energKPD.Text);
-  bal:=StrToFloat(kolvoball.Text);
-  InitTaskParam(DYparam, r0, i0, rk, ik, Tm, rate);
-  M0:=GetStartMass(param, c*1000, Tm*24*3600, DYParam.Vxk*1000, mpn);
-  P:=GetMTAPower(param,c*1000, m0*DYParam.begin_accel*1000);
-  copt:=GetRateopt(param, Tm*24*3600);
-  startmass.Text:=FloatToStr(M0);
+  // 1) Считываем всё в локальные переменные (как было)
+  if not TryStrToFloat(MassaPN.Text, Mpn) then begin
+    ShowMessage('Неверное значение массы полезной нагрузки');
+    Exit;
+  end;
+  if not TryStrToFloat(MotorVr.Text, Tm) then begin
+    ShowMessage('Неверное значение времени полёта');
+    Exit;
+  end;
+  if not TryStrToFloat(ScorostIst.Text, c) then begin
+    ShowMessage('Неверное значение скорости истечения');
+    Exit;
+  end;
+  i0 := StrToFloat(nakl0.Text) * Pi/180;
+  r0 := StrToFloat(radius0.Text);
+  e0 := StrToFloat(exc0.Text);
+  ik := StrToFloat(naklkon.Text) * Pi/180;
+  rk := StrToFloat(radiuskon.Text);
+  ek := StrToFloat(exckon.Text);
 
+  AlphaEY  := StrToFloat(udmassEY.Text);
+  GammaDY  := StrToFloat(udmassDY.Text);
+  GammaK   := StrToFloat(udmasskotsr.Text);
+  GammaSPX := StrToFloat(otnmassSPH.Text);
+  NuT      := StrToFloat(tyagKPD.Text);
+  NuEY     := StrToFloat(energKPD.Text);
+  bal      := StrToFloat(kolvoball.Text);
+
+  // 2) Простые проверки, чтобы не делить на ноль
+  if (NuT = 0) or (NuEY = 0) then begin
+    ShowMessage('Ошибка: КПД не может быть равным 0.');
+    Exit;
+  end;
+  if c = 0 then begin
+    ShowMessage('Ошибка: скорость истечения не может быть равной 0.');
+    Exit;
+  end;
+
+  // 3) Инициализируем параметры энергоустановки
+  param.AlphaEY  := AlphaEY;
+  param.GammaDY  := GammaDY;
+  param.GammaK   := GammaK;
+  param.GammaSPX := GammaSPX;
+  param.NuT      := NuT;
+  param.NuEY     := NuEY;
+
+  // 4) Подготовка параметров перелёта (не трогаем)
+  InitTaskParam(DYParam, r0, i0, rk, ik, Tm, c);
+
+  // 5) Собственно расчёты
+  M0   := GetStartMass(param, c, Tm*24*3600, DYParam.Vxk*1000, Mpn);
+  P    := GetMTAPower(param, c, M0*DYParam.begin_accel*1000);
+  copt := GetRateopt(param, Tm*24*3600);
+
+  // 6) Отображаем результаты
+  startmass.Text := FloatToStr(M0);
+  Moshnost.Text  := FloatToStr(P);
+  exc0.Text      := FloatToStr(copt);
 end;
 
 procedure TForm1.poiskChange(Sender: TObject);

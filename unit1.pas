@@ -114,14 +114,14 @@ begin
  if not FileExists('engines.dbf') then begin
 
   with Dbf1.FieldDefs do begin
-   Add('№', ftAutoInc, 0, True);
-   Add('Название', ftString, 16, True);
-   Add('Тяга, мН', ftString, 16, True);
-   Add('Удельный импульс, с', ftString, 16, True);
-   Add('Потребляемая мощность, кВт', ftString, 16, True);
-   Add('КПД, %', ftString, 16, True);
-   Add('Ресурс, ч', ftString, 16, True);
-   Add('Масса, кг', ftString, 16, True);
+   Add('ID', ftAutoInc, 0, True);
+   Add('NAME', ftString, 16, True);
+   Add('Thrust, mN', ftString, 16, True);
+   Add('Specific impulse, s', ftString, 16, True);
+   Add('Power consumption, kW', ftString, 16, True);
+   Add('Efficiency, %', ftString, 16, True);
+   Add('Resource, h', ftString, 16, True);
+   Add('Weight, kg', ftString, 16, True);
   end;
 
   Dbf1.CreateTable;
@@ -204,7 +204,7 @@ end;
 procedure TForm1.poiskChange(Sender: TObject);
 var s: string;
 begin
- s:=Format('Название="%s"', [(Sender as TEdit).Text]);
+ s:=Format('NAME="%s"', [(Sender as TEdit).Text]);
  StatusBar1.SimpleText:=s;
  Dbf1.Filter:=s;
 end;
