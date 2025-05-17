@@ -18,11 +18,31 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <TopLine Value="141"/>
         <CursorPos X="22" Y="167"/>
+        <ComponentState Value="1"/>
         <UsageCount Value="28"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\usolver.pas"/>
+        <UnitName Value="uSolver"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="28"/>
+      </Unit>
+      <Unit>
+        <Filename Value="model.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Model"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="106"/>
+        <CursorPos Y="134"/>
+        <UsageCount Value="24"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="..\model.pas"/>
@@ -30,16 +50,6 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <UsageCount Value="24"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\usolver.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="uSolver"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="28"/>
       </Unit>
       <Unit>
         <Filename Value="..\со стартовой массой\model.pas"/>
@@ -50,22 +60,20 @@
         <UsageCount Value="20"/>
       </Unit>
       <Unit>
-        <Filename Value="model.pas"/>
+        <Filename Value="usolver.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Model"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="106"/>
-        <CursorPos X="32" Y="123"/>
-        <UsageCount Value="24"/>
-        <Loaded Value="True"/>
+        <UnitName Value="uSolver"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="E:\lazarus\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="130" TopLine="103"/>
-      </Position>
       <Position>
         <Filename Value="unit1.pas"/>
         <Caret Line="136" Column="43" TopLine="117"/>
@@ -162,10 +170,6 @@
         <Caret Line="95" Column="16" TopLine="80"/>
       </Position>
       <Position>
-        <Filename Value="model.pas"/>
-        <Caret Line="70" Column="78" TopLine="101"/>
-      </Position>
-      <Position>
         <Filename Value="unit1.pas"/>
         <Caret Line="153" Column="17" TopLine="142"/>
       </Position>
@@ -180,6 +184,14 @@
       <Position>
         <Filename Value="unit1.pas"/>
         <Caret Line="163" Column="23" TopLine="150"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="167" Column="22"/>
+      </Position>
+      <Position>
+        <Filename Value="model.pas"/>
+        <Caret Line="123" Column="32" TopLine="106"/>
       </Position>
     </JumpHistory>
     <RunParams>
