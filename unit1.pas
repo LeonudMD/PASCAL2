@@ -77,6 +77,8 @@ type
     procedure Dbf1FilterRecord(DataSet: TDataSet; var Accept: Boolean);
 
   private
+    /// заполняет таблицу всеми записями
+    procedure PopulateDB;
 
   public
 
@@ -111,28 +113,110 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  Dbf1.FilePath:=ExtractFilePath(Application.ExeName);
- Dbf1.FilePathFull:=ExtractFilePath(Application.ExeName);
- if not FileExists('engines.dbf') then begin
+  // Путь к файлу
+  Dbf1.FilePath     := ExtractFilePath(Application.ExeName);
+  Dbf1.FilePathFull := Dbf1.FilePath;
 
-  with Dbf1.FieldDefs do begin
-   Add('ID', ftAutoInc, 0, True);
-   Add('NAME', ftString, 16, True);
-   Add('Thrust, mN', ftString, 16, True);
-   Add('Specific impulse, s', ftString, 16, True);
-   Add('Power consumption, kW', ftString, 16, True);
-   Add('Efficiency, %', ftString, 16, True);
-   Add('Resource, h', ftString, 16, True);
-   Add('Weight, kg', ftString, 16, True);
+  // Если файла нет — создаём схему и наполняем сразу
+  if not FileExists('engines.dbf') then
+  begin
+    with Dbf1.FieldDefs do
+    begin
+      Add('ID',          ftAutoInc,  0, True);
+      Add('NAME',        ftString,   32, True);
+      Add('THRUST_MN',   ftString,   16, True);
+      Add('ISP_KMPS',    ftString,   16, True);
+      Add('POWER_KW',    ftString,   16, True);
+      Add('EFF_PERCENT', ftString,    8, True);
+      Add('RESOURCE_H',  ftString,   16, True);
+    end;
+    Dbf1.CreateTable;
+    Dbf1.Open;
+    PopulateDB;
+  end
+  else
+    Dbf1.Open;
+
+  // Привязываем фильтрацию
+  Dbf1.OnFilterRecord := @Dbf1FilterRecord;
+end;
+
+// Заполняем DBF всеми строками (имя;тяга;ISP;мощность;КПД;ресурс)
+procedure TForm1.PopulateDB;
+var
+  SL, parts: TStringList;
+  i: Integer;
+begin
+  SL := TStringList.Create;
+  parts := TStringList.Create;
+  try
+    // Разбор по «;» без учёта пробелов
+    parts.Delimiter := ';';
+    parts.StrictDelimiter := True;
+
+    // --- Таблица 1.1: основные ионные двигатели ---
+    SL.Add('XIPS-13;18;23,5;0,45;50;12000');
+    SL.Add('XIPS-25;79-165;35;2,0-4,2;70;');
+    SL.Add('XIPS-30;92;32,5;2,4;;');
+    SL.Add('NSTAR;19-92;19,5-32,8;0,49-2,3;38-64;>10000');
+    SL.Add('NEXT;237;>41;6,9;>70;');
+    SL.Add('NEXIS;60-90;25;;;');
+    SL.Add('HiPEP;590-450;60-80;23,5;74;');
+
+    // --- Таблица 1.2: стационарные плазменные двигатели ---
+    SL.Add('СПД-25;7;8-10;0,1;20;1200');
+    SL.Add('СПД-35;10;12;0,2;30;2500');
+    SL.Add('СПД-50;20;12,5;0,35;35;2250');
+    SL.Add('СПД-60;30;13;0,5;37;2500');
+    SL.Add('СПД-70;40;14,5;0,65;44;3100');
+    SL.Add('СПД-100(100Д);83/70;15/27,5;1,35/2;50;9000');
+    SL.Add('СПД-1350(PPS-1350);88;>=17,2;1,5;52;7000');
+    SL.Add('СПД-140;280/170;17/28;4,5;55;8200');
+    SL.Add('СПД-200;185-488;17,56;3-0,11;50-63;18000');
+    SL.Add('СПД-290;до1500;15-30;5,0-30,0;65;27000');
+
+    // --- Таблица 1.4 (продолжение): ВНТ, BPT, T-220 ---
+    SL.Add('BHT-200;11;13,5;0,2;>=37;2000');
+    SL.Add('BHT-600;36;17;0,6;>=51;6000');
+    SL.Add('BHT-1000;55;18,7;0,9;53;6000');
+    SL.Add('BHT-8000;512;12-35;8;63;6000');
+    SL.Add('BPT-2000;98;17;2;49;>6000');
+    SL.Add('BPT-4000;187-161;16,89-18,8;3;50;>6000');
+    SL.Add('T-220;>500;24,5;10;59;');
+
+    // --- Таблица 1.3: экспериментальные образцы ---
+    SL.Add('Д-38/Д-38М;25-100;13-28;0,2-1,5;50-70;');
+    SL.Add('Д-60;35-140;12-30;0,4-2,2;40-55;');
+    SL.Add('Д-80(двухступ.);45-240;12-33,5;0,6-5,6;40-70;');
+    SL.Add('Д-90-I(одност.);260;5,0-6;3,5;50-65;');
+    SL.Add('Д-90-II(двухступ.);150;8,5;4,0;55;');
+    SL.Add('Д-100-I(одност.);80-340;14,5-28;1,3-7,5;40-60;');
+    SL.Add('Д-100-II(двухступ.);80-650;18-42,5;3,5-15;50-65;');
+    SL.Add('TM-50(двухступ.);1000-1500;30-70;20-50;50-65;');
+    SL.Add('VINITAL-160;618;76,67;36;63;');
+
+    // И наконец — пушим всё в DBF
+    for i := 0 to SL.Count - 1 do
+    begin
+      parts.DelimitedText := SL[i];
+      if parts.Count < 5 then Continue;  // мало данных
+      Dbf1.Append;
+      Dbf1.FieldByName('NAME').AsString      := parts[0];
+      Dbf1.FieldByName('THRUST_MN').AsString := parts[1];
+      Dbf1.FieldByName('ISP_KMPS').AsString  := parts[2];
+      Dbf1.FieldByName('POWER_KW').AsString  := parts[3];
+      Dbf1.FieldByName('EFF_PERCENT').AsString := parts[4];
+      // если есть ресурс — ставим, иначе оставляем пустым
+      if parts.Count >= 6 then
+        Dbf1.FieldByName('RESOURCE_H').AsString := parts[5]
+      else
+        Dbf1.FieldByName('RESOURCE_H').Clear;
+      Dbf1.Post;
+    end;
+  finally
+    parts.Free;
+    SL.Free;
   end;
-
-  Dbf1.CreateTable;
- end;
-
- Dbf1.Open;
-
- Dbf1.OnFilterRecord := @Dbf1FilterRecord;
-
 end;
 
 procedure TForm1.CheckBox1Change(Sender: TObject);
