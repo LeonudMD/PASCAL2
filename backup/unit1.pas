@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  ComCtrls, DBCtrls, DBGrids, uSolver, dbf, DB, Model;
+  ComCtrls, DBCtrls, DBGrids, uSolver, dbf, DB, Model, LazUTF8;
 
 type
 
@@ -74,6 +74,8 @@ type
     procedure CheckBox1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure poiskChange(Sender: TObject);
+    procedure Dbf1FilterRecord(DataSet: TDataSet; var Accept: Boolean);
+
   private
 
   public
@@ -128,6 +130,9 @@ begin
  end;
 
  Dbf1.Open;
+
+ Dbf1.OnFilterRecord := @Dbf1FilterRecord;
+ Dbf1.Filtered       := True;
 
 end;
 
@@ -202,12 +207,24 @@ begin
 end;
 
 procedure TForm1.poiskChange(Sender: TObject);
-var s: string;
 begin
- s:=Format('Название="%s"', [(Sender as TEdit).Text]);
- StatusBar1.SimpleText:=s;
- Dbf1.Filter:=s;
+  // при любом изменении строки просто переключаем фильтр
+  Dbf1.Filtered := False;
+  Dbf1.Filtered := True;
+  StatusBar1.SimpleText := poisk.Text;
 end;
+
+
+procedure TForm1.Dbf1FilterRecord(DataSet: TDataSet; var Accept: Boolean);
+var
+  needle, hay: String;
+begin
+  // ищем непустую подстроку без учёта регистра
+  needle := UTF8LowerCase(poisk.Text);
+  hay    := UTF8LowerCase(DataSet.FieldByName('NAME').AsString);
+  Accept := (needle = '') or (Pos(needle, hay) > 0);
+end;
+
 
 end.
 
